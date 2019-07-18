@@ -1,7 +1,7 @@
 {
-  "name": "@reonomy/rx-hooks",
+  "name": "@reonomy/reactive-hooks",
   "version": "1.0.0",
-  "description": "RxJS React Hooks",
+  "description": "RxJS React Hooks Library",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
