@@ -1,0 +1,11 @@
+.idea
+.nyc_output
+assets
+coverage
+docs
+node_modules
+src
+test
+_config.yaml
+.coveralls.yaml
+.travis.yaml
