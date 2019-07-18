@@ -20,6 +20,7 @@ export function useRxAjax<Req, Res>(
   api$: (req: Req) => Observable<Res>,
   next?: (response: Http<Req, Res>) => void
 ): [Http<Req, Res> | undefined, (req: Req) => void] {
+  const a = '';
   const [req$] = useState(() => new Subject<Req>());
   const res$ = useMemo(() => req$.pipe(http(api$)), [req$]);
   const [res, setRes] = useState<Http<Req, Res>>();

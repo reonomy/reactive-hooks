@@ -16,15 +16,17 @@
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "src/**/*.{js,jsx,ts,tsx}": [
       "pretty-quick --staged",
-      "eslint src/ --fix",
-      "yarn test:staged",
-      "git add"
+      "eslint --fix",
+      "jest --env=jsdom --findRelatedTests"
     ]
   },
   "jest": {
-    "coverageReporters": ["lcov", "text"]
+    "coverageReporters": [
+      "lcov",
+      "text"
+    ]
   },
   "repository": {
     "type": "git",
@@ -64,7 +66,9 @@
     "eslint-plugin-react": "^7.14.2",
     "husky": "^3.0.0",
     "jest": "^24.8.0",
-    "lint-staged": "^9.2.0",
+    "lint-staged": "^8.1.4",
+    "prettier": "^1.18.2",
+    "pretty-quick": "^1.11.1",
     "react-dom": "^16.8.6",
     "react-testing-library": "^7.0.1",
     "ts-jest": "^24.0.2",
