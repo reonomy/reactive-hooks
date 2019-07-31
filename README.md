@@ -1,4 +1,9 @@
+# <img src="https://github.com/reonomy/reactive-hooks/raw/master/assets/logo.png" height="80px"/>
+
 # Reactive Hooks Library For React
+
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/reonomy/reactive-hooks/blob/master/LICENSE) 
+[![npm version](https://img.shields.io/npm/v/@reonomy/reactive-hooks.svg?style=flat-square)](https://www.npmjs.com/package/@reonomy/reactive-hooks) 
 
 ```bash
 $ yarn add @reonomy/reactive-hooks
@@ -115,6 +120,10 @@ useMountEffect(didMount);
 
 # Author
 [Dmitry Doronin](https://www.linkedin.com/in/ddoronin)
+
+# References
+
+1. [The Road to React: Building the Reactive Hooks Library](https://www.reonomy.com/blog/post/reactive-hooks)
 
 # License
 MIT
