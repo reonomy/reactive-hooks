@@ -118,13 +118,12 @@ Invokes a callback function when a component is mounted and rendered for the ver
 useMountEffect(didMount);
 ```
 
-# Author
-[Dmitry Doronin](https://www.linkedin.com/in/ddoronin)
-
 # References
 
 1. [The Road to React: Building the Reactive Hooks Library](https://www.reonomy.com/blog/post/reactive-hooks)
 
+# Author
+[Dmitry Doronin](https://www.linkedin.com/in/ddoronin)
+
 # License
 MIT
-
