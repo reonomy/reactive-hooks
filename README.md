@@ -1,4 +1,4 @@
-# <img src="https://github.com/reonomy/reactive-hooks/raw/master/assets/logo.png" height="80px"/>
+# <img src="https://github.com/reonomy/reactive-hooks/raw/master/assets/logo.png" height="200px"/>
 
 # Reactive Hooks Library For React
 
