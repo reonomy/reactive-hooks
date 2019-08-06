@@ -121,6 +121,7 @@ useMountEffect(didMount);
 # References
 
 1. [The Road to React: Building the Reactive Hooks Library](https://www.reonomy.com/blog/post/reactive-hooks)
+2. [Hitchhiker’s guide to Reactive Hooks](https://itnext.io/hitchhikers-guide-to-reactive-hooks-92c1a708ccfe)
 
 # Author
 [Dmitry Doronin](https://www.linkedin.com/in/ddoronin)
