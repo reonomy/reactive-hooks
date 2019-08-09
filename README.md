@@ -10,7 +10,13 @@ $ yarn add @reonomy/reactive-hooks
 ```
 Reactive Hooks is a library for rendering [RxJS](https://rxjs-dev.firebaseapp.com/) Observables using [React Hooks](https://reactjs.org/docs/hooks-reference.html#usestate).
 
-# API Reference
+## References
+
+1. [The Road to React: Building the Reactive Hooks Library](https://www.reonomy.com/blog/post/reactive-hooks)
+
+2. [Hitchhiker’s guide to Reactive Hooks](https://itnext.io/hitchhikers-guide-to-reactive-hooks-92c1a708ccfe)
+
+# API
 
 ## useRxState
 Returns a current value and a function to update it.
@@ -117,11 +123,6 @@ Invokes a callback function when a component is mounted and rendered for the ver
 ```typescript
 useMountEffect(didMount);
 ```
-
-# References
-
-1. [The Road to React: Building the Reactive Hooks Library](https://www.reonomy.com/blog/post/reactive-hooks)
-2. [Hitchhiker’s guide to Reactive Hooks](https://itnext.io/hitchhikers-guide-to-reactive-hooks-92c1a708ccfe)
 
 # Author
 [Dmitry Doronin](https://www.linkedin.com/in/ddoronin)
