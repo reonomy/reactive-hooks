@@ -16,6 +16,10 @@ Reactive Hooks is a library for rendering [RxJS](https://rxjs-dev.firebaseapp.co
 
 2. [Hitchhiker’s guide to Reactive Hooks](https://itnext.io/hitchhikers-guide-to-reactive-hooks-92c1a708ccfe)
 
+3. [Dependency Injection in React](https://itnext.io/dependency-injection-in-react-6fcdbd2005e6)
+
+4. [Ajax in the Fog or HTTP in React](https://itnext.io/ajax-in-the-fog-or-http-in-react-b04c716e97e5)
+
 # API
 
 ## useRxState
