@@ -1,9 +1,8 @@
 import { Observable } from 'rxjs/internal/Observable';
 import { Subject } from 'rxjs/internal/Subject';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { debounceTime, switchMap } from 'rxjs/operators';
-import { useRxState } from './use-rx-state';
-import { useRxEffect } from './use-rx-effect';
+import { useRx } from './use-rx';
 
 export const DEBOUNCE = 500;
 
@@ -11,7 +10,7 @@ export const DEBOUNCE = 500;
  * `useRxDebounce`
  *
  * Applies debounce to a given observable function.
- * Example of usage is autosuggest that debounces http calls when user is typing.
+ * Can be used in Autosuggest.
  *
  * @param func$
  * @param next
@@ -30,11 +29,15 @@ export function useRxDebounce<In, Out>(
       ),
     [input$]
   );
-  useRxEffect(output$, val => {
-    if (next) {
-      next(val);
+  const [output, setOutput] = useState<Out | undefined>();
+  useRx(output$, {
+    next(val) {
+      setOutput(val);
+      // Optionally invoke a callback with a given value.
+      if (next) {
+        next(val);
+      }
     }
   });
-  const [output] = useRxState(output$);
   return [output, input$.next.bind(input$)];
 }
