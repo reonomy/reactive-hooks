@@ -9,3 +9,8 @@ test
 _config.yaml
 .coveralls.yaml
 .travis.yaml
+.eslintrc
+.prettierrc.json
+setupEnzyme.ts
+tsconfig.json
+jest.config.js
