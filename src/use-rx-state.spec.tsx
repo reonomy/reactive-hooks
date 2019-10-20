@@ -135,10 +135,12 @@ describe('useRxState()', () => {
   });
 
   describe('hasNext', () => {
-    it('should only be true for BehaviorSubject', () => {
+    it('should be true for all subjects', () => {
       expect(hasNext(new BehaviorSubject<null>(null))).toBe(true);
       expect(hasNext(new ReplaySubject<null>())).toBe(true);
       expect(hasNext(new Subject<null>())).toBe(true);
+    });
+    it('should not be true for observables', () => {
       expect(hasNext(new Observable<null>())).toBe(false);
     });
   });
