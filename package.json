@@ -48,6 +48,7 @@
     "rxjs": "^6.5.2"
   },
   "devDependencies": {
+    "@testing-library/react": "^9.3.0",
     "@types/enzyme": "^3.10.3",
     "@types/enzyme-adapter-react-16": "^1.0.5",
     "@types/jest": "^24.0.15",
@@ -71,7 +72,6 @@
     "pretty-quick": "^1.11.1",
     "react": "^16.9.0",
     "react-dom": "^16.8.6",
-    "react-testing-library": "^7.0.1",
     "rxjs": "^6.5.3",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.3.0",

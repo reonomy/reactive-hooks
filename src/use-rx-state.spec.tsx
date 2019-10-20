@@ -1,6 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-testing-library';
+import { act } from '@testing-library/react';
 import { Observable } from 'rxjs/internal/Observable';
 import { Subject } from 'rxjs/internal/Subject';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
