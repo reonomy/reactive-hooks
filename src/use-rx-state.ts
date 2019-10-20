@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Observable } from 'rxjs/internal/Observable';
 import { Subject } from 'rxjs/internal/Subject';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
+import { takeUntil } from 'rxjs/operators';
 import { useRx } from './use-rx';
 import { MutableObserver } from './mutable-observer';
 
@@ -9,18 +10,36 @@ import { MutableObserver } from './mutable-observer';
  * Returns `true` if a given observable has a next() method.
  * @param subject$
  */
-function hasNext<T>(
+export function hasNext<T>(
   subject$: Observable<T> | Subject<T> | BehaviorSubject<T>
 ): subject$ is Subject<T> | BehaviorSubject<T> {
   return typeof (subject$ as Subject<T>).next !== 'undefined';
 }
 
 /**
- * Returns `true` if a given subject provides current value.
- * @param subject$
+ * Gets initial value if the root observable is a behavior subject (as this will emit synchronously)
+ * @param observable$
  */
-function hasValue<T>(subject$: Observable<T> | Subject<T> | BehaviorSubject<T>): subject$ is BehaviorSubject<T> {
-  return typeof (subject$ as BehaviorSubject<T>).value !== 'undefined';
+
+// since we don't know what initial observable value is
+// we use a Symbol to indicate that it is nothing with certainty
+export const UNSET_VALUE = Symbol('unset');
+
+export function initialObservableValue<T>(observable$: Observable<T>): T | symbol {
+  let initialValue: T | symbol = UNSET_VALUE;
+  const unsubscribe$ = new Subject<void>();
+
+  observable$.pipe(takeUntil(unsubscribe$)).subscribe(mostRecentValueIsSynchronousHere => {
+    initialValue = mostRecentValueIsSynchronousHere;
+  });
+
+  // unsubscribe after one tick whether we fired or not, prevents memory leak
+  setTimeout(() => {
+    unsubscribe$.next();
+    unsubscribe$.complete();
+  });
+
+  return initialValue;
 }
 
 /**
@@ -48,17 +67,25 @@ export function useRxState<S extends Observable<any> | Subject<any> | BehaviorSu
   ? [T | undefined]
   : never {
   const isSubject = useMemo(() => hasNext(subject$), [subject$]);
-  const isBehaviorSubject = useMemo(() => hasValue(subject$), [subject$]);
-  const nextObj = useMemo(() => ({ isNext: !isBehaviorSubject }), [subject$]);
+  const initialValue: { initialValueContainer: any } = useMemo(
+    () => ({ initialValueContainer: initialObservableValue(subject$) }),
+    [subject$]
+  );
+  const hasBehaviorSubjectRoot = useMemo(() => initialValue.initialValueContainer !== UNSET_VALUE, [subject$]);
+  const nextObj: { isNext: boolean } = useMemo(() => ({ isNext: !hasBehaviorSubjectRoot }), [subject$]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [value, setValue] = useState(isBehaviorSubject ? (subject$ as BehaviorSubject<any>).value : undefined);
-
   const observer = useMemo(() => new MutableObserver(), [subject$]);
-  observer.setNext(nextValue => {
+
+  const [value, setValue] = useState(() =>
+    initialValue.initialValueContainer === UNSET_VALUE ? undefined : initialValue.initialValueContainer
+  );
+
+  observer.setNext(function(nextValue) {
     if (nextObj.isNext) {
       setValue(nextValue);
     } else {
       nextObj.isNext = true;
+      delete initialValue.initialValueContainer; // eliminate reference after using
     }
   });
 
