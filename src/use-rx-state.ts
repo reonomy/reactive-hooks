@@ -22,11 +22,11 @@ export function hasNext<T>(
  */
 
 // since we don't know what initial observable value is
-// we use a Symbol to indicate that it is nothing with certainty
-export const UNSET_VALUE = Symbol('unset');
+// we use a unique object pointer to indicate "no initial value" with certainty
+export const UNSET_VALUE = {};
 
-export function initialObservableValue<T>(observable$: Observable<T>): T | symbol {
-  let initialValue: T | symbol = UNSET_VALUE;
+export function initialObservableValue<T>(observable$: Observable<T>): T | {} {
+  let initialValue: T | {} = UNSET_VALUE;
   const unsubscribe$ = new Subject<void>();
 
   observable$.pipe(takeUntil(unsubscribe$)).subscribe(mostRecentValueIsSynchronousHere => {
