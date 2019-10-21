@@ -63,25 +63,26 @@ export function useRxState<S extends Observable<any> | Subject<any> | BehaviorSu
   : never {
   const initObj = useMemo(() => {
     const initVal = initialObservableValue(subject$);
+    const hadInitVal = initVal !== UNSET_VALUE;
+
     return {
       isSubject: hasNext(subject$),
       initVal,
-      hasInitVal: initVal !== UNSET_VALUE
+      hadInitVal,
+      isNext: !hadInitVal
     };
   }, [subject$]);
-
-  const nextObj: { isNext: boolean } = useMemo(() => ({ isNext: !initObj.hasInitVal }), [subject$]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const observer = useMemo(() => new MutableObserver(), [subject$]);
 
-  const [value, setValue] = useState(() => (initObj.hasInitVal ? initObj.initVal : undefined));
+  const [value, setValue] = useState(() => (initObj.hadInitVal ? initObj.initVal : undefined));
 
   observer.setNext(function(nextValue) {
-    if (nextObj.isNext) {
+    if (initObj.isNext) {
       setValue(nextValue);
     } else {
-      nextObj.isNext = true;
+      initObj.isNext = true;
       delete initObj.initVal; // eliminate reference after using
     }
   });
