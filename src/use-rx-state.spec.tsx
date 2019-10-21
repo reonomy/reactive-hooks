@@ -1,10 +1,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-testing-library';
+import { act } from '@testing-library/react';
 import { Observable } from 'rxjs/internal/Observable';
 import { Subject } from 'rxjs/internal/Subject';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-import { useRxState } from './use-rx-state';
+import { ReplaySubject } from 'rxjs/internal/ReplaySubject';
+import { map } from 'rxjs/operators';
+import { useRxState, hasNext, initialObservableValue, UNSET_VALUE } from './use-rx-state';
 
 interface IFoo {
   foo$: Observable<string>;
@@ -129,6 +131,40 @@ describe('useRxState()', () => {
 
       act(() => bar$.next('bob'));
       expect(fooComp.text()).toContain('bob');
+    });
+  });
+
+  describe('hasNext', () => {
+    it('should be true for all subjects', () => {
+      expect(hasNext(new BehaviorSubject<null>(null))).toBe(true);
+      expect(hasNext(new ReplaySubject<null>())).toBe(true);
+      expect(hasNext(new Subject<null>())).toBe(true);
+    });
+    it('should not be true for observables', () => {
+      expect(hasNext(new Observable<null>())).toBe(false);
+    });
+  });
+
+  describe('initialObservableValue', () => {
+    it('should provide initial value for BehaviorSubject', () => {
+      expect(initialObservableValue(new BehaviorSubject<null>(null))).toBe(null);
+    });
+    it('should unset for non-BehaviorSubjects', () => {
+      expect(initialObservableValue(new ReplaySubject<null>())).toBe(UNSET_VALUE);
+      expect(initialObservableValue(new Subject<null>())).toBe(UNSET_VALUE);
+      expect(initialObservableValue(new Observable<null>())).toBe(UNSET_VALUE);
+    });
+    it('should handle the piped scenario', () => {
+      expect(initialObservableValue(new BehaviorSubject<null>(null).pipe(map(value => value)))).toBe(null);
+    });
+    it('should handle the piped scenario after the value has been changed', () => {
+      const behaviorSubject$ = new BehaviorSubject<any>(null);
+
+      const piped$ = behaviorSubject$.pipe(map(value => value));
+
+      behaviorSubject$.next('check');
+
+      expect(initialObservableValue(piped$)).toBe('check');
     });
   });
 });

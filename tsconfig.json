@@ -11,11 +11,6 @@
     "module": "commonjs",
     "jsx": "react"
   },
-  "include": [
-    "./src/index.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
-  ]
+  "include": ["./src/index.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts", "**/*.spec.tsx"]
 }

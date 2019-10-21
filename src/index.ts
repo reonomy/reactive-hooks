@@ -1,6 +1,6 @@
 // Rx Hooks
 export * from './use-rx';
-export * from './use-rx-state';
+export { useRxState, useRxStateResult, useRxStateAction } from './use-rx-state';
 export * from './use-rx-effect';
 export * from './use-rx-ajax';
 export * from './use-rx-debounce';

@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { Observable } from 'rxjs/internal/Observable';
 import { Subject } from 'rxjs/internal/Subject';
-import { act } from 'react-testing-library';
+import { act } from '@testing-library/react';
 import { useRxAjax } from './use-rx-ajax';
 
 interface IFoo {

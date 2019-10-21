@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Observable } from 'rxjs/internal/Observable';
 import { Subject } from 'rxjs/internal/Subject';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
+import { takeUntil } from 'rxjs/operators';
 import { useRx } from './use-rx';
 import { MutableObserver } from './mutable-observer';
 
@@ -9,18 +10,31 @@ import { MutableObserver } from './mutable-observer';
  * Returns `true` if a given observable has a next() method.
  * @param subject$
  */
-function hasNext<T>(
+export function hasNext<T>(
   subject$: Observable<T> | Subject<T> | BehaviorSubject<T>
 ): subject$ is Subject<T> | BehaviorSubject<T> {
   return typeof (subject$ as Subject<T>).next !== 'undefined';
 }
 
 /**
- * Returns `true` if a given subject provides current value.
- * @param subject$
+ * Gets initial value if the root observable is a behavior subject (as this will emit synchronously)
+ * @param observable$
  */
-function hasValue<T>(subject$: Observable<T> | Subject<T> | BehaviorSubject<T>): subject$ is BehaviorSubject<T> {
-  return typeof (subject$ as BehaviorSubject<T>).value !== 'undefined';
+
+// since we don't know what initial observable value is
+// we use a unique object pointer to indicate "no initial value" with certainty
+export const UNSET_VALUE = {};
+
+export function initialObservableValue<T>(observable$: Observable<T>): T | {} {
+  let initialValue: T | {} = UNSET_VALUE;
+
+  observable$
+    .subscribe(val => {
+      initialValue = val;
+    })
+    .unsubscribe();
+
+  return initialValue;
 }
 
 /**
@@ -47,24 +61,35 @@ export function useRxState<S extends Observable<any> | Subject<any> | BehaviorSu
   : S extends Observable<infer T>
   ? [T | undefined]
   : never {
-  const isSubject = useMemo(() => hasNext(subject$), [subject$]);
-  const isBehaviorSubject = useMemo(() => hasValue(subject$), [subject$]);
-  const nextObj = useMemo(() => ({ isNext: !isBehaviorSubject }), [subject$]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [value, setValue] = useState(isBehaviorSubject ? (subject$ as BehaviorSubject<any>).value : undefined);
+  const initObj = useMemo(() => {
+    const initVal = initialObservableValue(subject$);
+    const hadInitVal = initVal !== UNSET_VALUE;
 
+    return {
+      isSubject: hasNext(subject$),
+      initVal,
+      hadInitVal,
+      isNext: !hadInitVal
+    };
+  }, [subject$]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const observer = useMemo(() => new MutableObserver(), [subject$]);
-  observer.setNext(nextValue => {
-    if (nextObj.isNext) {
+
+  const [value, setValue] = useState(() => (initObj.hadInitVal ? initObj.initVal : undefined));
+
+  observer.setNext(function(nextValue) {
+    if (initObj.isNext) {
       setValue(nextValue);
     } else {
-      nextObj.isNext = true;
+      initObj.isNext = true;
+      delete initObj.initVal; // eliminate reference after using
     }
   });
 
   useRx(subject$, observer);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const nextValue = isSubject ? (subject$ as Subject<any>).next.bind(subject$) : undefined;
+  const nextValue = initObj.isSubject ? (subject$ as Subject<any>).next.bind(subject$) : undefined;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return [value, nextValue] as any;
 }

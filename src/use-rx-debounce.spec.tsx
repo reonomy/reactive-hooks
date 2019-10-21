@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { Observable } from 'rxjs/internal/Observable';
 import { of } from 'rxjs/internal/observable/of';
-import { act } from 'react-testing-library';
+import { act } from '@testing-library/react';
 import { useRxDebounce, DEBOUNCE } from './use-rx-debounce';
 
 interface IFoo {
@@ -35,10 +35,14 @@ describe('useRxDebounce()', () => {
     tb.simulate('change', { target: { value: 'foo' } });
 
     const result = fooComp.find('#result');
-    act(() => jest.advanceTimersByTime(DEBOUNCE - 1));
+    act(() => {
+      jest.advanceTimersByTime(DEBOUNCE - 1);
+    });
     expect(result.text()).toContain('None');
 
-    act(() => jest.advanceTimersByTime(1));
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
     expect(result.text()).toContain('foo');
   });
 });

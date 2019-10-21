@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { mount } from 'enzyme';
 import { Observable } from 'rxjs/internal/Observable';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-import { act } from 'react-testing-library';
+import { act } from '@testing-library/react';
 import { useRxEffect } from './use-rx-effect';
 
 interface IFoo {
