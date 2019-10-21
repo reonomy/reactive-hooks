@@ -27,17 +27,12 @@ export const UNSET_VALUE = {};
 
 export function initialObservableValue<T>(observable$: Observable<T>): T | {} {
   let initialValue: T | {} = UNSET_VALUE;
-  const unsubscribe$ = new Subject<void>();
 
-  observable$.pipe(takeUntil(unsubscribe$)).subscribe(mostRecentValueIsSynchronousHere => {
-    initialValue = mostRecentValueIsSynchronousHere;
-  });
-
-  // unsubscribe after one tick whether we fired or not, prevents memory leak
-  setTimeout(() => {
-    unsubscribe$.next();
-    unsubscribe$.complete();
-  });
+  observable$
+    .subscribe(val => {
+      initialValue = val;
+    })
+    .unsubscribe();
 
   return initialValue;
 }
@@ -66,32 +61,34 @@ export function useRxState<S extends Observable<any> | Subject<any> | BehaviorSu
   : S extends Observable<infer T>
   ? [T | undefined]
   : never {
-  const isSubject = useMemo(() => hasNext(subject$), [subject$]);
-  const initialValue: { initialValueContainer: any } = useMemo(
-    () => ({ initialValueContainer: initialObservableValue(subject$) }),
-    [subject$]
-  );
-  const hasBehaviorSubjectRoot = useMemo(() => initialValue.initialValueContainer !== UNSET_VALUE, [subject$]);
-  const nextObj: { isNext: boolean } = useMemo(() => ({ isNext: !hasBehaviorSubjectRoot }), [subject$]);
+  const initObj = useMemo(() => {
+    const initVal = initialObservableValue(subject$);
+    return {
+      isSubject: hasNext(subject$),
+      initVal,
+      hasInitVal: initVal !== UNSET_VALUE
+    };
+  }, [subject$]);
+
+  const nextObj: { isNext: boolean } = useMemo(() => ({ isNext: !initObj.hasInitVal }), [subject$]);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const observer = useMemo(() => new MutableObserver(), [subject$]);
 
-  const [value, setValue] = useState(() =>
-    initialValue.initialValueContainer === UNSET_VALUE ? undefined : initialValue.initialValueContainer
-  );
+  const [value, setValue] = useState(() => (initObj.hasInitVal ? initObj.initVal : undefined));
 
   observer.setNext(function(nextValue) {
     if (nextObj.isNext) {
       setValue(nextValue);
     } else {
       nextObj.isNext = true;
-      delete initialValue.initialValueContainer; // eliminate reference after using
+      delete initObj.initVal; // eliminate reference after using
     }
   });
 
   useRx(subject$, observer);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const nextValue = isSubject ? (subject$ as Subject<any>).next.bind(subject$) : undefined;
+  const nextValue = initObj.isSubject ? (subject$ as Subject<any>).next.bind(subject$) : undefined;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return [value, nextValue] as any;
 }
