@@ -23,4 +23,15 @@ describe('useMountEffect()', () => {
 
     expect(onMountCallback).toHaveBeenCalledTimes(1);
   });
+
+  it('should call unmount callback', () => {
+    const unMountCallback = jest.fn();
+    const onMountCallback = () => {
+      return unMountCallback;
+    };
+    const foo = mount(<Foo foo="foo" onMount={onMountCallback} />);
+    foo.unmount();
+
+    expect(unMountCallback).toHaveBeenCalledTimes(1);
+  });
 });
