@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { Observable } from 'rxjs/internal/Observable';
 import { Subject } from 'rxjs/internal/Subject';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-import { takeUntil } from 'rxjs/operators';
 import { useRx } from './use-rx';
 import { MutableObserver } from './mutable-observer';
 
@@ -78,7 +77,7 @@ export function useRxState<S extends Observable<any> | Subject<any> | BehaviorSu
 
   const [value, setValue] = useState(() => (initObj.hadInitVal ? initObj.initVal : undefined));
 
-  observer.setNext(function(nextValue) {
+  observer.setNext(nextValue => {
     if (initObj.isNext) {
       setValue(nextValue);
     } else {
