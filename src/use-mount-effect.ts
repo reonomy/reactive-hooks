@@ -11,7 +11,7 @@ export interface Disposable {
  * @param {Disposable} onMountCallback - this function will be called only once when the component is mounted.
  */
 export function useMountEffect(onMountCallback: Disposable) {
-  useEffect(() => onMountCallback(), [onMountCallback]);
+  useEffect(() => onMountCallback(), []);
 }
 
 export default useMountEffect;
