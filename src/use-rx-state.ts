@@ -36,6 +36,38 @@ export function initialObservableValue<T>(observable$: Observable<T>): T | {} {
   return initialValue;
 }
 
+interface RxConfig<V, S> {
+  isSubject: boolean;
+  initVal: V;
+  hadInitVal: boolean;
+  isNext: boolean;
+  nextValue?: (value?: V) => void;
+  observer: MutableObserver<S>;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createRxConfig<S extends Observable<any> | Subject<any> | BehaviorSubject<any>>(
+  subject$: S
+): RxConfig<any, S> {
+  const initVal = initialObservableValue(subject$);
+  const hadInitVal = initVal !== UNSET_VALUE;
+  const isSubject = hasNext(subject$);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nextValue = isSubject ? (subject$ as Subject<any>).next.bind(subject$) : undefined;
+
+  const observer = new MutableObserver<S>();
+
+  return {
+    isSubject,
+    initVal,
+    hadInitVal,
+    isNext: !hadInitVal,
+    nextValue,
+    observer
+  };
+}
+
 /**
  * `useRxState`
  *
@@ -60,24 +92,10 @@ export function useRxState<S extends Observable<any> | Subject<any> | BehaviorSu
   : S extends Observable<infer T>
   ? [T | undefined]
   : never {
-  const initObj = useMemo(() => {
-    const initVal = initialObservableValue(subject$);
-    const hadInitVal = initVal !== UNSET_VALUE;
-
-    return {
-      isSubject: hasNext(subject$),
-      initVal,
-      hadInitVal,
-      isNext: !hadInitVal
-    };
-  }, [subject$]);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const observer = useMemo(() => new MutableObserver(), [subject$]);
-
+  const initObj = useMemo(() => createRxConfig(subject$), [subject$]);
   const [value, setValue] = useState(() => (initObj.hadInitVal ? initObj.initVal : undefined));
 
-  observer.setNext(nextValue => {
+  initObj.observer.setNext(nextValue => {
     if (initObj.isNext) {
       setValue(nextValue);
     } else {
@@ -86,11 +104,10 @@ export function useRxState<S extends Observable<any> | Subject<any> | BehaviorSu
     }
   });
 
-  useRx(subject$, observer);
+  useRx(subject$, initObj.observer);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const nextValue = initObj.isSubject ? (subject$ as Subject<any>).next.bind(subject$) : undefined;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return [value, nextValue] as any;
+  return [value, initObj.nextValue] as any;
 }
 
 /**
@@ -117,5 +134,6 @@ export function useRxStateResult<T>(observable$: Observable<T>): T | undefined {
  * const setName = useRxStateResult(name$);
  */
 export function useRxStateAction<T>(subject$: Subject<T>): (value: T) => void {
-  return subject$.next.bind(subject$);
+  const next = useMemo(() => subject$.next.bind(subject$), [subject$]);
+  return next;
 }

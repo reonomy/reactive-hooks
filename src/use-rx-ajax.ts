@@ -2,7 +2,13 @@ import { useState, useMemo } from 'react';
 import { Observable } from 'rxjs/internal/Observable';
 import { Subject } from 'rxjs/internal/Subject';
 import { Http, http } from './http';
-import { useRx } from './use-rx';
+import { useRxEffect } from './use-rx-effect';
+
+function useReqRes<Req, Res>(api$: (req: Req) => Observable<Res>): [Observable<Http<Req, Res>>, (value?: Req) => void] {
+  const req$ = new Subject<Req>();
+  const res$ = req$.pipe(http(api$));
+  return [res$, req$.next.bind(req$)];
+}
 
 /**
  * `useRxAjax`
@@ -20,16 +26,13 @@ export function useRxAjax<Req, Res>(
   api$: (req: Req) => Observable<Res>,
   next?: (response: Http<Req, Res>) => void
 ): [Http<Req, Res> | undefined, (req: Req) => void] {
-  const [req$] = useState(() => new Subject<Req>());
-  const res$ = useMemo(() => req$.pipe(http(api$)), [req$]);
+  const [res$, submitReq] = useMemo(() => useReqRes(api$), [api$]);
   const [res, setRes] = useState<Http<Req, Res>>();
-  useRx(res$, {
-    next(nextRes) {
-      setRes(nextRes);
-      if (next) {
-        next(nextRes);
-      }
+  useRxEffect(res$, (nextRes: Http<Req, Res>) => {
+    setRes(nextRes);
+    if (next) {
+      next(nextRes);
     }
   });
-  return [res, req$.next.bind(req$)];
+  return [res, submitReq];
 }
