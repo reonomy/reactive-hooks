@@ -3,7 +3,7 @@ import { Observable } from 'rxjs/internal/Observable';
 import { NextObserver } from 'rxjs/internal/types';
 
 let subscriptionsCount = 0;
-const isDebugMode = /debug$/m.test(window.location.hash);
+const isDebugMode = typeof window !== 'undefined' && /debug$/m.test(window.location.hash);
 const printSubscriptionsCount = isDebugMode
   ? // eslint-disable-next-line no-console
     () => console.debug('%c #', 'color: #40bbc6;', subscriptionsCount)
